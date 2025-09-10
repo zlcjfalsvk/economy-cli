@@ -15,14 +15,14 @@ A Node.js CLI tool for real-time monitoring of major U.S. economic indicators. P
 
 ## Supported Economic Indicators
 
-| Code | Indicator | Description |
-|------|-----------|-------------|
-| `gdp` | GDP Growth Rate | Real Gross Domestic Product (Quarterly, Annualized) |
-| `nonfarm` | Nonfarm Payrolls | Total Nonfarm Employment (Thousands) |
-| `cpi` | Consumer Price Index (CPI) | Urban Consumer Price Index (Seasonally Adjusted) |
-| `ppi` | Producer Price Index (PPI) | Producer Price Index for All Commodities (Seasonally Adjusted) |
-| `corePce` | Core PCE Price Index | Personal Consumption Expenditures excluding Food and Energy |
-| `fedRate` | Federal Funds Rate | Effective Federal Funds Rate (Daily) |
+| Code      | Indicator                  | Description                                                    |
+| --------- | -------------------------- | -------------------------------------------------------------- |
+| `gdp`     | GDP Growth Rate            | Real Gross Domestic Product (Quarterly, Annualized)            |
+| `nonfarm` | Nonfarm Payrolls           | Total Nonfarm Employment (Thousands)                           |
+| `cpi`     | Consumer Price Index (CPI) | Urban Consumer Price Index (Seasonally Adjusted)               |
+| `ppi`     | Producer Price Index (PPI) | Producer Price Index for All Commodities (Seasonally Adjusted) |
+| `corePce` | Core PCE Price Index       | Personal Consumption Expenditures excluding Food and Energy    |
+| `fedRate` | Federal Funds Rate         | Effective Federal Funds Rate (Daily)                           |
 
 ## Installation
 
@@ -231,6 +231,7 @@ economy-cli/
 ```
 
 **Solution:**
+
 1. Add `FRED_API_KEY=your_key` to `.env` file
 2. Or set environment variable directly
 
@@ -241,6 +242,7 @@ economy-cli/
 ```
 
 **Solution:**
+
 - Try again after 1-2 minutes
 - Verify cache is enabled
 
@@ -251,6 +253,7 @@ economy-cli/
 ```
 
 **Solution:**
+
 - Check internet connection
 - Verify FRED API server status
 - Check proxy settings
@@ -276,10 +279,6 @@ MIT License - See [LICENSE](LICENSE) file for details.
 - [Node.js](https://nodejs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Commander.js](https://github.com/tj/commander.js/)
-
-## Author
-
-Your Name - [@yourusername](https://github.com/yourusername)
 
 ## Acknowledgments
 
