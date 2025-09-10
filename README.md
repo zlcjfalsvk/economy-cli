@@ -67,6 +67,7 @@ Create a `.env` file in the project root:
 ```env
 FRED_API_KEY=your_api_key_here
 CLI_LANG=en  # Language setting (en/ko, default: en)
+REFRESH_INTERVAL=30  # Refresh interval for --live option in seconds (default: 30)
 ```
 
 #### Method 2: System Environment Variables
@@ -265,6 +266,7 @@ economy-cli/
 |----------|-------------|---------|----------|
 | `FRED_API_KEY` | FRED API Key (Required) | None | `your_api_key_here` |
 | `CLI_LANG` | Language setting | `en` | `ko` or `en` |
+| `REFRESH_INTERVAL` | Refresh interval for --live option (seconds) | `30` | `60` |
 
 ### Supported Languages
 

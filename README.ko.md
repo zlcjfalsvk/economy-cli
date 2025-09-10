@@ -67,6 +67,7 @@ npm link
 ```env
 FRED_API_KEY=your_api_key_here
 CLI_LANG=ko  # 언어 설정 (en/ko, 기본값: en)
+REFRESH_INTERVAL=30  # --live 옵션의 새로고침 주기 (초 단위, 기본값: 30)
 ```
 
 #### 방법 2: 시스템 환경 변수
@@ -265,6 +266,7 @@ economy-cli/
 |------------|------|--------|------|
 | `FRED_API_KEY` | FRED API 키 (필수) | 없음 | `your_api_key_here` |
 | `CLI_LANG` | 언어 설정 | `en` | `ko` 또는 `en` |
+| `REFRESH_INTERVAL` | --live 옵션 새로고침 주기 (초) | `30` | `60` |
 
 ### 지원 언어
 

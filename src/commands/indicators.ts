@@ -193,7 +193,8 @@ export class IndicatorCommands {
     }
 
     let iteration = 0;
-    const updateInterval = 30000; // 30초마다 업데이트
+    const refreshIntervalSeconds = parseInt(process.env.REFRESH_INTERVAL || '30', 10);
+    const updateInterval = refreshIntervalSeconds * 1000; // 환경 변수로부터 읽은 초를 밀리초로 변환
 
     const indicatorConfigs = indicators; // Store the config object
     
