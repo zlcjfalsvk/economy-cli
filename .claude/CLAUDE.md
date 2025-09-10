@@ -1,0 +1,2 @@
+- npm install 할 때 resitry option 을 무조건 추가 해주세요
+  - `--registry https ://registry.npmjs.org/`
