@@ -29,6 +29,11 @@ describe('Formatter', () => {
       expect(result).toBe('125.79');
     });
 
+    it('PPI를 소수점 2자리로 포맷해야 함', () => {
+      const result = Formatter.formatValue(289.556, 'PPIACO');
+      expect(result).toBe('289.56');
+    });
+
     it('NaN 값은 N/A로 표시해야 함', () => {
       const result = Formatter.formatValue(NaN, 'any');
       expect(result).toBe('N/A');

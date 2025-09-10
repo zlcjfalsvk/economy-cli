@@ -50,6 +50,7 @@ describe('RateLimiter', () => {
   });
 
   it('에러를 적절히 전파해야 함', async () => {
+    vi.useRealTimers(); // 이 테스트에서는 실제 타이머 사용
     const errorFn = vi.fn().mockRejectedValue(new Error('Test error'));
 
     await expect(rateLimiter.execute(errorFn)).rejects.toThrow('Test error');
