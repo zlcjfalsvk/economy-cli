@@ -23,7 +23,7 @@ export class IndicatorCommands {
       const indicators: EconomicIndicator[] = [];
       const errors: string[] = [];
 
-      for (const [, config] of Object.entries(INDICATORS)) {
+      for (const [, config] of Object.entries(INDICATORS())) {
         try {
           spinner.text = `${config.name} 데이터를 가져오는 중...`;
           const indicator = await this.client.getLatestObservation(
@@ -64,11 +64,12 @@ export class IndicatorCommands {
   }
 
   async getSpecificIndicator(indicatorKey: string): Promise<void> {
-    const config = INDICATORS[indicatorKey];
+    const indicators = INDICATORS();
+    const config = indicators[indicatorKey];
     
     if (!config) {
       console.error(Formatter.formatError(
-        `'${indicatorKey}'는 유효하지 않은 지표입니다. 사용 가능한 지표: ${Object.keys(INDICATORS).join(', ')}`
+        `'${indicatorKey}'는 유효하지 않은 지표입니다. 사용 가능한 지표: ${Object.keys(indicators).join(', ')}`
       ));
       process.exit(1);
     }
@@ -102,11 +103,12 @@ export class IndicatorCommands {
   }
 
   async getHistorical(indicatorKey: string, limit: number = 10): Promise<void> {
-    const config = INDICATORS[indicatorKey];
+    const indicators = INDICATORS();
+    const config = indicators[indicatorKey];
     
     if (!config) {
       console.error(Formatter.formatError(
-        `'${indicatorKey}'는 유효하지 않은 지표입니다. 사용 가능한 지표: ${Object.keys(INDICATORS).join(', ')}`
+        `'${indicatorKey}'는 유효하지 않은 지표입니다. 사용 가능한 지표: ${Object.keys(indicators).join(', ')}`
       ));
       process.exit(1);
     }
@@ -153,7 +155,7 @@ export class IndicatorCommands {
     console.log('\n' + chalk.bold.cyan('📊 사용 가능한 경제 지표'));
     console.log(chalk.gray('각 지표는 --indicator 옵션과 함께 사용할 수 있습니다.\n'));
 
-    Object.entries(INDICATORS).forEach(([key, config]) => {
+    Object.entries(INDICATORS()).forEach(([key, config]) => {
       console.log(`  ${chalk.green(key.padEnd(10))} - ${chalk.cyan(config.name)}`);
       console.log(`  ${' '.repeat(12)}${chalk.gray(config.description)}\n`);
     });
@@ -169,15 +171,16 @@ export class IndicatorCommands {
     console.log(chalk.bold.cyan('🔄 실시간 경제 지표 모니터링 시작'));
     console.log(chalk.gray('종료하려면 Ctrl+C를 누르세요.\n'));
 
-    const selectedIndicators = indicatorsArg === 'all' 
-      ? Object.keys(INDICATORS)
+    const indicators = INDICATORS();
+    const selectedIndicators: string[] = indicatorsArg === 'all' 
+      ? Object.keys(indicators)
       : indicatorsArg.split(',').map(s => s.trim());
 
     // 유효성 검사
     for (const key of selectedIndicators) {
-      if (!INDICATORS[key]) {
+      if (!indicators[key]) {
         console.error(Formatter.formatError(
-          `'${key}'는 유효하지 않은 지표입니다. 사용 가능한 지표: ${Object.keys(INDICATORS).join(', ')}`
+          `'${key}'는 유효하지 않은 지표입니다. 사용 가능한 지표: ${Object.keys(indicators).join(', ')}`
         ));
         process.exit(1);
       }
@@ -192,6 +195,8 @@ export class IndicatorCommands {
     let iteration = 0;
     const updateInterval = 30000; // 30초마다 업데이트
 
+    const indicatorConfigs = indicators; // Store the config object
+    
     const updateData = async () => {
       const currentTime = new Date().toLocaleString('ko-KR');
       
@@ -202,11 +207,11 @@ export class IndicatorCommands {
       console.log(chalk.gray(`현재 시간: ${currentTime}`));
       console.log(chalk.gray(`업데이트 횟수: ${++iteration}\n`));
 
-      const indicators: EconomicIndicator[] = [];
+      const indicatorData: EconomicIndicator[] = [];
       const errors: string[] = [];
 
       for (const key of selectedIndicators) {
-        const config = INDICATORS[key];
+        const config = indicatorConfigs[key as keyof typeof indicatorConfigs];
         try {
           const indicator = await this.client.getLatestObservation(
             config.seriesId,
@@ -214,7 +219,7 @@ export class IndicatorCommands {
           );
           
           if (indicator) {
-            indicators.push(indicator);
+            indicatorData.push(indicator);
           } else {
             errors.push(`${config.name}: 데이터 없음`);
           }
@@ -223,19 +228,19 @@ export class IndicatorCommands {
         }
       }
 
-      if (indicators.length > 0) {
-        console.log(Formatter.formatTable(indicators));
+      if (indicatorData.length > 0) {
+        console.log(Formatter.formatTable(indicatorData));
         
         // 단일 지표 + 추정치 옵션이 활성화된 경우
         if (showEstimates && selectedIndicators.length === 1) {
           const key = selectedIndicators[0];
-          const config = INDICATORS[key];
+          const config = indicatorConfigs[key as keyof typeof indicatorConfigs];
           const estimates = await this.estimatesProvider.getEstimates(config.seriesId);
           
-          if (estimates && indicators[0]) {
+          if (estimates && indicatorData[0]) {
             console.log('\n' + chalk.bold.yellow('📊 월스트릿 추정치 vs 실제값'));
             
-            const actual = indicators[0].value;
+            const actual = indicatorData[0].value;
             const comparison = this.estimatesProvider.compareWithActual(actual, estimates.consensusEstimate);
             
             // 비교 결과 표시

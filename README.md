@@ -66,6 +66,7 @@ Create a `.env` file in the project root:
 
 ```env
 FRED_API_KEY=your_api_key_here
+CLI_LANG=en  # Language setting (en/ko, default: en)
 ```
 
 #### Method 2: System Environment Variables
@@ -257,6 +258,18 @@ economy-cli/
 ├── vitest.config.ts
 └── README.md
 ```
+
+## Environment Variables
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|----------|
+| `FRED_API_KEY` | FRED API Key (Required) | None | `your_api_key_here` |
+| `CLI_LANG` | Language setting | `en` | `ko` or `en` |
+
+### Supported Languages
+
+- `en`: English (Default)
+- `ko`: Korean
 
 ## API Limitations
 

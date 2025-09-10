@@ -3,25 +3,31 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { IndicatorCommands } from './commands/indicators.js';
-import { FRED_API_KEY } from './utils/config.js';
+import { FRED_API_KEY, getIndicators } from './utils/config.js';
 import { Formatter } from './utils/formatter.js';
+import { i18n } from './i18n/index.js';
 
 const program = new Command();
 const indicatorCommands = new IndicatorCommands();
+const t = i18n.t;
 
 program
-  .name('economy')
-  .description('미국 경제 지표를 실시간으로 조회하는 CLI 도구')
+  .name(t.cli.name)
+  .description(t.cli.description)
   .version('1.0.0')
-  .option('-i, --indicator <type>', '특정 경제 지표 조회 (gdp, nonfarm, cpi, corePce, fedRate, ppi)')
-  .option('-H, --history <count>', '과거 데이터 조회 (기본값: 10)', '10')
-  .option('-l, --list', '사용 가능한 모든 지표 목록 표시')
-  .option('-a, --all', '모든 주요 경제 지표 한번에 조회')
-  .option('--live [indicators]', '실시간 모니터링 모드 (쉼표로 구분된 지표 또는 all)')
-  .option('--estimates', '월스트릿 추정치 표시 (--live 모드에서 단일 지표일 때만 작동)')
-  .helpOption('-h, --help', '도움말 표시')
-  .addHelpText('after', `
-${chalk.cyan('사용 예시:')}
+  .option('-i, --indicator <type>', `${t.commands.indicator} (gdp, nonfarm, cpi, corePce, fedRate, ppi)`)
+  .option('-H, --history <count>', t.commands.history, '10')
+  .option('-l, --list', t.commands.list)
+  .option('-a, --all', t.commands.all)
+  .option('--live [indicators]', t.commands.live)
+  .option('--estimates', t.commands.estimates)
+  .helpOption('-h, --help', t.commands.help)
+  .addHelpText('after', () => {
+    const indicators = getIndicators();
+    const lang = i18n.getLanguage();
+    
+    const examples = lang === 'ko' ? `
+${chalk.cyan(t.cli.examples + ':')}
   $ economy --all                    # 모든 주요 경제 지표 조회
   $ economy --indicator gdp           # GDP 성장률 조회
   $ economy --indicator fedRate       # 연준 금리 조회
@@ -29,31 +35,41 @@ ${chalk.cyan('사용 예시:')}
   $ economy --list                    # 사용 가능한 지표 목록 확인
   $ economy --live                    # 모든 지표 실시간 모니터링
   $ economy --live gdp,cpi,fedRate    # 특정 지표만 실시간 모니터링
-  $ economy --live cpi --estimates    # CPI 실시간 모니터링 + 월스트릿 추정치
+  $ economy --live cpi --estimates    # CPI 실시간 모니터링 + 월스트릿 추정치` : `
+${chalk.cyan(t.cli.examples + ':')}
+  $ economy --all                    # Query all major economic indicators
+  $ economy --indicator gdp           # Query GDP growth rate
+  $ economy --indicator fedRate       # Query Federal Funds Rate
+  $ economy --indicator cpi --history 20  # Query CPI with 20 historical data points
+  $ economy --list                    # List available indicators
+  $ economy --live                    # Monitor all indicators in real-time
+  $ economy --live gdp,cpi,fedRate    # Monitor specific indicators
+  $ economy --live cpi --estimates    # Monitor CPI with Wall Street estimates`;
 
-${chalk.yellow('환경 변수:')}
-  FRED_API_KEY    FRED API 키 (필수)
-                  https://fred.stlouisfed.org/docs/api/api_key.html 에서 발급
+    return `${examples}
 
-${chalk.green('사용 가능한 지표:')}
-  gdp       GDP 성장률
-  nonfarm   비농업 고용지수
-  cpi       소비자물가지수 (CPI)
-  corePce   근원 개인소비지출 물가지수 (Core PCE)
-  fedRate   연준 금리
-  ppi       생산자물가지수 (PPI)
+${chalk.yellow(t.cli.environment + ':')}
+  FRED_API_KEY    FRED API Key (Required)
+                  https://fred.stlouisfed.org/docs/api/api_key.html
+  CLI_LANG        Language setting (en/ko, default: en)
 
-${chalk.gray('자세한 정보는 https://github.com/yourusername/economy-cli 를 참조하세요.')}
-`);
+${chalk.green(t.cli.availableIndicators + ':')}
+  gdp       ${indicators.gdp.name}
+  nonfarm   ${indicators.nonfarm.name}
+  cpi       ${indicators.cpi.name}
+  corePce   ${indicators.corePce.name}
+  fedRate   ${indicators.fedRate.name}
+  ppi       ${indicators.ppi.name}
+
+${chalk.gray(t.cli.moreInfo + ' https://github.com/yourusername/economy-cli')}
+`;
+  });
 
 async function main() {
   try {
     if (!FRED_API_KEY) {
       console.error(Formatter.formatError(
-        'FRED_API_KEY 환경변수가 설정되지 않았습니다.\n' +
-        '  1. https://fred.stlouisfed.org/docs/api/api_key.html 에서 API 키를 발급받으세요.\n' +
-        '  2. 환경변수를 설정하세요: export FRED_API_KEY=your_api_key\n' +
-        '  3. 또는 .env 파일에 FRED_API_KEY=your_api_key 를 추가하세요.'
+        t.messages.apiKeyMissing + '\n' + t.messages.apiKeyInstructions
       ));
       process.exit(1);
     }

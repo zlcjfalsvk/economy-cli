@@ -66,6 +66,7 @@ npm link
 
 ```env
 FRED_API_KEY=your_api_key_here
+CLI_LANG=ko  # 언어 설정 (en/ko, 기본값: en)
 ```
 
 #### 방법 2: 시스템 환경 변수
@@ -257,6 +258,18 @@ economy-cli/
 ├── vitest.config.ts
 └── README.md
 ```
+
+## 환경 변수 설정
+
+| 환경 변수 | 설명 | 기본값 | 예시 |
+|------------|------|--------|------|
+| `FRED_API_KEY` | FRED API 키 (필수) | 없음 | `your_api_key_here` |
+| `CLI_LANG` | 언어 설정 | `en` | `ko` 또는 `en` |
+
+### 지원 언어
+
+- `en`: 영어 (English)
+- `ko`: 한국어 (Korean)
 
 ## API 제한 사항
 
