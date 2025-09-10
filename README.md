@@ -9,6 +9,7 @@ A Node.js CLI tool for real-time monitoring of major U.S. economic indicators. P
 - 📈 **Real-time Economic Indicators**: Monitor major indicators like GDP, CPI, PPI, employment, and Fed rates
 - 📊 **Historical Data**: Query historical data for any indicator with customizable limits
 - 🔄 **Live Monitoring Mode**: Continuous data updates with --live option
+- 🎯 **Wall Street Estimates**: Compare actual values with institutional forecasts for single indicators
 - ⚡ **Automatic Caching**: 60-second cache for fast response times
 - 🔒 **Rate Limiting**: Automatic API call management
 - 🎨 **Beautiful Output**: Clean data display with colors and tables
@@ -104,6 +105,7 @@ economy -l
 # Live monitoring mode
 economy --live                    # Monitor all indicators
 economy --live gdp,cpi,fedRate    # Monitor specific indicators
+economy --live cpi --estimates    # Monitor CPI with Wall Street estimates
 
 # Show help
 economy --help
@@ -169,6 +171,46 @@ Update count: 1
 └─────────────────────┴──────────────┴──────────┴─────────────┘
 
 Next update in 30 seconds...
+```
+
+#### 4. Live Monitoring with Wall Street Estimates
+
+```bash
+$ economy --live cpi --estimates
+
+🔄 Real-time Economic Indicator Monitoring
+Update interval: 30s | Exit: Ctrl+C
+Current time: 2024-01-15 15:30:00
+Update count: 1
+
+┌─────────────────────┬──────────────┬──────────┬─────────────┐
+│ Indicator           │ Value        │ Unit     │ Date        │
+├─────────────────────┼──────────────┼──────────┼─────────────┤
+│ CPI                 │ 310.33       │ Index    │ Jan 2024    │
+└─────────────────────┴──────────────┴──────────┴─────────────┘
+
+📊 Wall Street Estimates vs Actual
+
+Actual: 310.33
+Consensus: 309.20
+Difference: +1.13 (+0.37%) 📈
+
+Estimate Range: 308.50 ~ 311.00
+Median: 309.20
+Number of Estimates: 15
+
+Top Institutional Estimates:
+┌─────────────────┬──────────┬───────────┬─────────────┐
+│ Institution     │ Estimate │ Confidence │ Date        │
+├─────────────────┼──────────┼───────────┼─────────────┤
+│ Goldman Sachs   │ 309.50   │ High       │ Jan 10, 2024│
+│ JP Morgan       │ 309.20   │ High       │ Jan 11, 2024│
+│ Bank of America │ 309.10   │ High       │ Jan 9, 2024 │
+│ Morgan Stanley  │ 311.00   │ Medium     │ Jan 12, 2024│
+│ Citi            │ 308.50   │ Medium     │ Jan 8, 2024 │
+└─────────────────┴──────────┴───────────┴─────────────┘
+
+Next Release Date: Jan 15, 2024
 ```
 
 ## Development

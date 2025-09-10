@@ -17,7 +17,8 @@ program
   .option('-H, --history <count>', '과거 데이터 조회 (기본값: 10)', '10')
   .option('-l, --list', '사용 가능한 모든 지표 목록 표시')
   .option('-a, --all', '모든 주요 경제 지표 한번에 조회')
-  .option('--live [indicators]', '실시간 모니터링 모드 (쉼표로 구분된 지표 또는 all)', 'all')
+  .option('--live [indicators]', '실시간 모니터링 모드 (쉼표로 구분된 지표 또는 all)')
+  .option('--estimates', '월스트릿 추정치 표시 (--live 모드에서 단일 지표일 때만 작동)')
   .helpOption('-h, --help', '도움말 표시')
   .addHelpText('after', `
 ${chalk.cyan('사용 예시:')}
@@ -28,6 +29,7 @@ ${chalk.cyan('사용 예시:')}
   $ economy --list                    # 사용 가능한 지표 목록 확인
   $ economy --live                    # 모든 지표 실시간 모니터링
   $ economy --live gdp,cpi,fedRate    # 특정 지표만 실시간 모니터링
+  $ economy --live cpi --estimates    # CPI 실시간 모니터링 + 월스트릿 추정치
 
 ${chalk.yellow('환경 변수:')}
   FRED_API_KEY    FRED API 키 (필수)
@@ -61,8 +63,9 @@ async function main() {
 
     if (options.list) {
       indicatorCommands.listAvailableIndicators();
-    } else if (options.live) {
-      await indicatorCommands.startLiveMonitoring(options.live);
+    } else if (options.live !== undefined) {
+      const indicatorsArg = options.live === true ? 'all' : options.live;
+      await indicatorCommands.startLiveMonitoring(indicatorsArg, options.estimates || false);
     } else if (options.all) {
       await indicatorCommands.getAllIndicators();
     } else if (options.indicator) {

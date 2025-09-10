@@ -5,12 +5,15 @@ import { FredApiClient } from '../api/fredClient.js';
 import { INDICATORS } from '../utils/config.js';
 import { Formatter } from '../utils/formatter.js';
 import { EconomicIndicator } from '../types/index.js';
+import { EstimatesProvider } from '../utils/estimatesProvider.js';
 
 export class IndicatorCommands {
   private client: FredApiClient;
+  private estimatesProvider: EstimatesProvider;
 
   constructor() {
     this.client = new FredApiClient();
+    this.estimatesProvider = new EstimatesProvider();
   }
 
   async getAllIndicators(): Promise<void> {
@@ -161,7 +164,7 @@ export class IndicatorCommands {
     console.log('  economy --live gdp,cpi,fedRate');
   }
 
-  async startLiveMonitoring(indicatorsArg: string): Promise<void> {
+  async startLiveMonitoring(indicatorsArg: string, showEstimates: boolean = false): Promise<void> {
     console.clear();
     console.log(chalk.bold.cyan('🔄 실시간 경제 지표 모니터링 시작'));
     console.log(chalk.gray('종료하려면 Ctrl+C를 누르세요.\n'));
@@ -178,6 +181,12 @@ export class IndicatorCommands {
         ));
         process.exit(1);
       }
+    }
+
+    // 추정치는 단일 지표일 때만 표시
+    if (showEstimates && selectedIndicators.length > 1) {
+      console.log(Formatter.formatWarning('월스트릿 추정치는 단일 지표 모니터링 시에만 표시됩니다.'));
+      showEstimates = false;
     }
 
     let iteration = 0;
@@ -216,6 +225,59 @@ export class IndicatorCommands {
 
       if (indicators.length > 0) {
         console.log(Formatter.formatTable(indicators));
+        
+        // 단일 지표 + 추정치 옵션이 활성화된 경우
+        if (showEstimates && selectedIndicators.length === 1) {
+          const key = selectedIndicators[0];
+          const config = INDICATORS[key];
+          const estimates = await this.estimatesProvider.getEstimates(config.seriesId);
+          
+          if (estimates && indicators[0]) {
+            console.log('\n' + chalk.bold.yellow('📊 월스트릿 추정치 vs 실제값'));
+            
+            const actual = indicators[0].value;
+            const comparison = this.estimatesProvider.compareWithActual(actual, estimates.consensusEstimate);
+            
+            // 비교 결과 표시
+            const surpriseIcon = comparison.surprise === 'positive' ? '📈' : 
+                                comparison.surprise === 'negative' ? '📉' : '➡️';
+            const surpriseColor = comparison.surprise === 'positive' ? chalk.green : 
+                                 comparison.surprise === 'negative' ? chalk.red : chalk.yellow;
+            
+            console.log(chalk.white(`\n실제값: ${Formatter.formatValue(actual, config.seriesId)}`));
+            console.log(chalk.white(`컨센서스: ${Formatter.formatValue(estimates.consensusEstimate, config.seriesId)}`));
+            console.log(surpriseColor(`차이: ${comparison.difference > 0 ? '+' : ''}${comparison.difference.toFixed(2)} (${comparison.percentDifference > 0 ? '+' : ''}${comparison.percentDifference.toFixed(2)}%) ${surpriseIcon}`));
+            
+            // 추정치 범위
+            console.log(chalk.gray(`\n추정치 범위: ${Formatter.formatValue(estimates.low, config.seriesId)} ~ ${Formatter.formatValue(estimates.high, config.seriesId)}`));
+            console.log(chalk.gray(`중간값: ${Formatter.formatValue(estimates.median, config.seriesId)}`));
+            console.log(chalk.gray(`참여 기관 수: ${estimates.numberOfEstimates}개`));
+            
+            // 주요 기관 추정치 (상위 5개)
+            console.log(chalk.bold.cyan('\n주요 기관 추정치:'));
+            const topEstimates = estimates.estimates.slice(0, 5);
+            const estimatesData = topEstimates.map(est => [
+              est.institution,
+              Formatter.formatValue(est.estimate, config.seriesId),
+              est.confidence ? 
+                (est.confidence === 'high' ? chalk.green('높음') : 
+                 est.confidence === 'medium' ? chalk.yellow('중간') : 
+                 chalk.red('낮음')) : '-',
+              Formatter.formatDate(est.date),
+            ]);
+            
+            const estimatesTable = table([
+              [chalk.bold('기관'), chalk.bold('추정치'), chalk.bold('신뢰도'), chalk.bold('날짜')],
+              ...estimatesData,
+            ]);
+            
+            console.log(estimatesTable);
+            
+            if (estimates.nextReleaseDate) {
+              console.log(chalk.blue(`\n다음 발표 예정일: ${Formatter.formatDate(estimates.nextReleaseDate)}`));
+            }
+          }
+        }
       }
 
       if (errors.length > 0) {
